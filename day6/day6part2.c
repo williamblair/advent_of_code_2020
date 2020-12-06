@@ -2164,9 +2164,18 @@ static bool countEntry(const char* entry,
     size_t index = 0;
     const size_t len = strlen(entry);
     memset(answeredQs, 0, sizeof(answeredQs));
+
+    countOnePerson(entry, &index, answeredQs);
+
     while (index < len)
     {
-        countOnePerson(entry, &index, answeredQs);
+        memset(curAnswers, 0, sizeof(curAnswers));
+        countOnePerson(entry, &index, curAnswers);
+
+        for (i = 0; i < 26; i++)
+        {
+            answeredQs[i] &= curAnswers[i];
+        }
     }
 
     *numQuestions = 0;
