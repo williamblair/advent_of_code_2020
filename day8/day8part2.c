@@ -813,7 +813,7 @@ int main(void)
         {
             programExitSuccess = true;
             printf("Accum: %d\n", cpu.acc);
-            return 0;
+            goto endProg;
         }
     }
 
@@ -850,10 +850,11 @@ int main(void)
         {
             programExitSuccess = true;
             printf("Accum: %d\n", cpu.acc);
-            return 0;
+            goto endProg;
         }
     }
 
+endProg:
     if (jmpLocations != NULL)
     {
         free(jmpLocations);
