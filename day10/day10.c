@@ -1,5 +1,5 @@
 /*
- * Day 9 - Joltage adapters
+ * Day 10 - Joltage adapters
  */
 
 #include <stdio.h>
