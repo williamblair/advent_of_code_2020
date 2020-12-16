@@ -9,10 +9,11 @@
 
 #include <vector>
 #include <algorithm>
+#include <map>
 
 #if 1
 #define INPUT_LEN 6
-uint64_t input[6] = 
+int64_t input[6] = 
 {
 18,11,9,0,5,1
 };
@@ -20,58 +21,101 @@ uint64_t input[6] =
 
 #if 0
 #define INPUT_LEN 3
-uint64_t input[3] = 
+int64_t input[3] = 
 {
 0,3,6
 };
 #endif
 
-static bool findLast(const std::vector<uint64_t>& arr, const uint64_t val, uint64_t* resPos)
+class MapEntry
 {
-    ssize_t i;
-    //printf("Arr size: %llu\n", arr.size());
-    for (i = arr.size()-2; i >= 0; i--)
+public:
+    int64_t first;
+    int64_t second;
+
+    MapEntry()
     {
-        //printf("i: %llu\n", i);
-        if (arr[i] == val)
-        {
-            //printf("Found %llu at pos %lu\n", val, i);
-            *resPos = i;
-            return true;
-        }
+        first = -1;
+        second = -1;
     }
 
-    return false;
+    MapEntry(int64_t first, int64_t second)
+    {
+        this->first = first;
+        this->second = second;
+    }
+
+    MapEntry(const MapEntry& other)
+    {
+        first = other.first;
+        second = other.second;
+    }
+
+    MapEntry& operator=(MapEntry& other)
+    {
+        first = other.first;
+        second = other.second;
+        return *this;
+    }
+};
+
+// key = the spoken number,
+// val = the last 2 indices it was spoken
+std::map<int64_t, MapEntry> spoken;
+
+static inline void setVal(const int64_t val, const int64_t index)
+{
+    if (spoken.count(val) == 0)
+    {
+        MapEntry dummy(-1,-1);
+        spoken[val] = dummy;
+        spoken[val].first = -1;
+        spoken[val].second = index;
+    }
+    else if (spoken[val].first == -1)
+    {
+        spoken[val].first = index;
+    }
+    else
+    {
+        spoken[val].second = spoken[val].first;
+        spoken[val].first = index;
+    }
 }
 
 int main(void)
 {
-    uint64_t lastPos = 0;
-    uint64_t lastSpoken = 0;
+    int64_t lastSpoken;
     size_t i;
-    std::vector<uint64_t> spoken(input, input+INPUT_LEN);
-    spoken.push_back(0);
-    //for (i = INPUT_LEN+1; i < 2020; i++)
-    for (i = INPUT_LEN+1; i < 30000000; i++)
+    MapEntry dummy(-1,-1);
+    spoken[0] = dummy;
+    for (i = 0; i < INPUT_LEN; i++)
     {
-        lastSpoken = *spoken.rbegin();
-        if (findLast(spoken, lastSpoken, &lastPos))
+        //spoken[input[i]] = dummy;
+        setVal(input[i], i+1);
+    }
+    lastSpoken = input[INPUT_LEN-1];
+
+    //for (i = INPUT_LEN+1; i <= 2020; i++)
+    for (i = INPUT_LEN+1; i <= 30000000; i++)
+    {
+        if (spoken.count(lastSpoken) == 0 ||
+            spoken[lastSpoken].first == -1)
         {
-            // has been said before
-            //printf("%llu Said before\n", lastSpoken);
-            uint64_t diff = (uint64_t)(spoken.size()-1 - lastPos);
-            spoken.push_back(diff);
-            lastSpoken = diff;
-            printf("Turn %lu says %llu\n", i+1, diff);
+            //spoken[0].first = i;
+            setVal(0, i);
+            lastSpoken = 0;
         }
         else
         {
-            // first time being said
-            spoken.push_back(0);
-            lastSpoken = 0;
-            printf("Turn %lu says %llu\n", i+1, 0);
+            int64_t newVal = spoken[lastSpoken].first - 
+                             spoken[lastSpoken].second;
+            setVal(newVal, i);
+            lastSpoken = newVal;
+            printf("Turn %lu says %ld\n", i, newVal);
         }
     }
+
     return 0;
 }
 
